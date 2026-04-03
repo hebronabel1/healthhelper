@@ -1,121 +1,51 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from 'react';
+import PasswordGate from './components/PasswordGate.jsx';
+import Navbar from './components/Navbar.jsx';
+import Home from './components/Home.jsx';
+import Diet from './components/diet/Diet.jsx';
+import Workout from './components/workout/Workout.jsx';
+import Diagnose from './components/diagnose/Diagnose.jsx';
+import Supplements from './components/supplements/Supplements.jsx';
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+function isUnlocked() {
+  return sessionStorage.getItem('hh_unlocked') === '1';
 }
 
-export default App
+export default function App() {
+  const [unlocked, setUnlocked] = useState(isUnlocked);
+  const [screen, setScreen] = useState('home');
+  const [darkMode, setDarkMode] = useState(true);
+
+  document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : '');
+
+  const toggleDark = () => {
+    setDarkMode(d => {
+      const next = !d;
+      document.documentElement.setAttribute('data-theme', next ? 'dark' : '');
+      return next;
+    });
+  };
+
+  if (!unlocked) {
+    return <PasswordGate onUnlock={() => { sessionStorage.setItem('hh_unlocked','1'); setUnlocked(true); }} darkMode={darkMode} toggleDark={toggleDark} />;
+  }
+
+  const renderScreen = () => {
+    switch (screen) {
+      case 'diet': return <Diet onBack={() => setScreen('home')} />;
+      case 'workout': return <Workout onBack={() => setScreen('home')} />;
+      case 'diagnose': return <Diagnose onBack={() => setScreen('home')} />;
+      case 'supplements': return <Supplements onBack={() => setScreen('home')} />;
+      default: return <Home onNavigate={setScreen} />;
+    }
+  };
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
+      <Navbar onLogoClick={() => setScreen('home')} darkMode={darkMode} toggleDark={toggleDark} />
+      <main key={screen} className="fade-up" style={{ paddingTop: '72px', paddingBottom: '60px' }}>
+        {renderScreen()}
+      </main>
+    </div>
+  );
+}
