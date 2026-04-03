@@ -1,4 +1,4 @@
-# HealthHelper 🥗
+# HealthHelper 
 
 An AI-powered personal health tool that generates personalized diet plans, workout routines, supplement recommendations, and evidence-backed health guidance — all through simple form inputs.
 
